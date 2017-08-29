@@ -15,6 +15,34 @@
 #define NAO_FUNDO ' '
 #define VISITADO 1
 
+/*#include <stdio.h>
+#include <stdlib.h>
+#include <dirent.h>
+
+int main(void)
+{
+
+    DIR *dir;
+    struct dirent *lsdir;
+
+    dir = opendir("C:\\Temp\\imgs");
+
+    // print all the files and directories within directory
+    while ( ( lsdir = readdir(dir) ) != NULL )
+    {
+        readdir(dir)
+        printf("%s\n")
+        printf ("%s\n", lsdir->d_name);
+    }
+
+    closedir(dir);
+
+    return 0;
+
+}*/
+
+
+
 
 typedef struct pixel_{
     int x, y;
