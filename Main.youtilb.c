@@ -6,7 +6,7 @@
 #include <string.h>
 
 //#define PATH "C:\\Users\\pastre-windows\\Dropbox\\PUCPR\\2017\\Segundo Semestre\\Estrutura de Dados\\Ima\\PacoteImagens1\\07.ppm"
-#define PATH "C:\\Temp\\10.ppm"
+#define PATH "C:\\Temp\\PacoteImagens2\\16.ppm"
 #define FORMATO "P6"
 #define ERRO -1
 #define FALSE 0
@@ -21,40 +21,10 @@ typedef struct pixel_{
     struct  pixel_ * next;
 } PIXEL;
 
-//Inicia a pilha
-void init_pilha(PIXEL *);
-//Empurra um elemento na pilha, retornando o cabecalho
+
 PIXEL * push(PIXEL  * , int, int, int *) ;
-//Puxa um elemento da pilha, retornando cabecalho
 PIXEL * pop(PIXEL * , int * , int *, int *);
 
-//Inicializa os valores
-unsigned char * * init_val (int *, int *);
-
-//Conta as imagens na tela
-int conta_imagens(unsigned char * *, int, int, PIXEL *, int *);
-
-//Funcao recursiva que analiza a vizinhanca
-int anal_viz(unsigned char * *, int, int, int, int, PIXEL *, int);
-//Analiza a vizinhanca
-
-
-int main() {
-	unsigned char * * matriz = NULL;
-	int wdt, hgt, lin, col, cont = 0;
-	//Topo da pilha
-	PIXEL * topo;
-	matriz = init_val(&wdt, &hgt);
-
-	init_pilha(topo);
-
-	printf("A imagem possui %d objetos\n\n", conta_imagens(matriz, wdt, hgt, topo, &cont));
-
-    system("PAUSE");
-	return 0;
-}
-
-//Inicializa a largura e a altura da imagem, retornando a matriz populada com fundo e nao-fundo
 unsigned char * * init_val( int * width, int * height) {
 	int i = 0, j, k, wdt, hgt, num_linhas = 0, max_cor, pos_pxl = 0, lin = 0, col = 0;
 	FILE * fp = NULL;
@@ -124,12 +94,53 @@ unsigned char * * init_val( int * width, int * height) {
 	return matriz;
 }
 
-//Retorna a quantidade de imagens dentro da imagem passada
+//Analiza a vizinhanca
+int anal_viz(unsigned char * * matriz, int x, int y, int wdt, int hgt, PIXEL * topo, int * cont){
+    int newX, newY;
+
+    do{
+        matriz[x][y] =  VISITADO;
+
+        if(y != hgt -1)
+            if((matriz[x][y + 1] != VISITADO) && (matriz[x][y + 1]  != FUNDO))
+                topo = push(topo, x, y + 1, cont);
+
+        if(x != wdt -1)
+            if((matriz[x + 1][y] != VISITADO) && (matriz[x + 1][y]  != FUNDO ))
+               topo =  push(topo, x + 1, y, cont);
+
+        if(y != 0)
+            if((matriz[x][y - 1] != VISITADO) && (matriz[x][y - 1]  != FUNDO) )
+              topo =   push(topo, x, y - 1, cont);
+
+        if(x != 0)
+            if((matriz[x - 1][y] != VISITADO) && (matriz[x - 1][y]  != FUNDO))
+               topo =  push(topo, x - 1, y, cont);
+
+          if(*cont != 0){
+                topo =  pop(topo, cont, &newX, &newY);
+               //rintf("newX %d newY %d\n", newX, newY);
+                x = newX;
+                y = newY;
+
+              //  printf("X %d Y %d\n", x, y);
+            }else{
+                return 1;
+            }
+    }while(1);
+
+
+
+}
+void init(PIXEL * head){
+    head = NULL;
+}
 int conta_imagens(unsigned char * * matriz, int wdt, int hgt, PIXEL * topo, int * cont){
     int i, j, k = 0;
     for(i = 0; i < wdt; i++)
     for(j = 0; j < hgt; j++){
         if(matriz[i][j] != matriz[0][0] && matriz[i][j] != VISITADO){
+             //   printf("%d ", k);
             k += anal_viz(matriz, i, j, wdt, hgt, topo, cont);
 
         }
@@ -138,43 +149,29 @@ int conta_imagens(unsigned char * * matriz, int wdt, int hgt, PIXEL * topo, int 
     return k;
 }
 
-//Recursiva que empilha pixels proximos
-int anal_viz(unsigned char * * matriz, int x, int y, int wdt, int hgt, PIXEL * topo, int * cont){
-    matriz[x][y] =  VISITADO;
-    int  newX,  newY;
-    if(y != hgt -1)
-        if((matriz[x][y + 1] != VISITADO) && (matriz[x][y + 1]  != FUNDO) && (y + 1 < hgt))
-            topo = push(topo, x, y + 1, cont);
+int main() {
+	unsigned char * * matriz = NULL;
+	int wdt, hgt, lin, col, cont = 0;
+	PIXEL * topo;
+	matriz = init_val(&wdt, &hgt);
+/*
+	for (lin = 0; lin < wdt; lin++) {
+		for (col = 0; col < hgt; col++) {
 
-    if(x != wdt -1)
-        if((matriz[x + 1][y] != VISITADO) && (matriz[x + 1][y]  != FUNDO )&& (x + 1 < wdt))
-           topo =  push(topo, x + 1, y, cont);
+			printf("%c", matriz[lin][col]);
+		}
+		printf("\n");
+	}
+*/
+	 init(topo);
 
-    if(y != 0)
-        if((matriz[x][y - 1] != VISITADO) && (matriz[x][y - 1]  != FUNDO) && (y - 1 > -1))
-          topo =   push(topo, x, y - 1, cont);
+	printf("A imagem possui %d objetos\n\n", conta_imagens(matriz, wdt, hgt, topo, &cont));
 
-    if(x != 0)
-        if((matriz[x - 1][y] != VISITADO) && (matriz[x - 1][y]  != FUNDO) && (x - 1 > -1))
-           topo =  push(topo, x - 1, y, cont);
-
-
-    //printf("CONT: %d\n", cont);
-    if(*cont == 0)
-        return 1;
-
-    else{
-          //  printf("Pppo");
-        topo =  pop(topo, cont, &newX, &newY);
-        return anal_viz(matriz, newX, newY, wdt, hgt, topo, cont);
-    }
+    system("PAUSE");
+	return 0;
 }
 
 
-//FUNCOES DA PILHA
-void init_pilha(PIXEL * head){
-    head = NULL;
-}
 
 PIXEL * push(PIXEL* topo, int xPos, int yPos, int * cont) {
     PIXEL * novo  = (PIXEL * )malloc(sizeof(PIXEL));
@@ -193,9 +190,11 @@ PIXEL * pop(PIXEL * topo, int * cont, int * dataX, int * dataY){
     PIXEL * to_free = topo;
     *dataX = topo -> x;
     *dataY = topo -> y;
-   // printf("Popped (%d, %d)\n\n", *dataX, *dataY );
+ //  printf("Popped (%d, %d)\n\n", *dataX, *dataY );
     topo = topo ->next;
     free(to_free);
     * cont -= 1;
     return topo;
 }
+
+
